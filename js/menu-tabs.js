@@ -110,14 +110,17 @@
 
     if (first || prefersReducedMotion() || !panel.animate) { renderPanel(category); return; }
 
+    // Troca o conteúdo na hora e só anima a entrada. Sem "fill": quando a animação
+    // termina (ou é interrompida), o painel volta ao estado normal, 100% visível.
+    // (Antes havia uma saída com fill: "forwards" que deixava a opacidade presa em 0
+    // e fazia o cardápio sumir no celular.)
     if (swapping) swapping.cancel();
-    panel.style.minHeight = panel.offsetHeight + "px";
-    swapping = panel.animate([{ opacity: 1, transform: "none" }, { opacity: 0, transform: "translateY(6px)" }], { duration: 110, easing: "ease-in", fill: "forwards" });
-    swapping.onfinish = () => {
-      renderPanel(category);
-      swapping = panel.animate([{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }], { duration: 220, easing: "cubic-bezier(.2,.7,.2,1)" });
-      swapping.onfinish = () => { panel.style.minHeight = ""; swapping = null; };
-    };
+    renderPanel(category);
+    swapping = panel.animate(
+      [{ opacity: 0, transform: "translateY(10px)" }, { opacity: 1, transform: "none" }],
+      { duration: 240, easing: "cubic-bezier(.2,.7,.2,1)" }
+    );
+    swapping.onfinish = () => { swapping = null; };
   }
 
   const tabFor = (id) => tabs.find((t) => t.dataset.cat === id);
